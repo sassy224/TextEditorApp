@@ -14,6 +14,7 @@ namespace TextEditorApp.CustomControl
     public partial class TextEditor : UserControl
     {
         private bool isWrite = false;
+        private string textContent = String.Empty;
 
         public TextEditor()
         {
@@ -214,7 +215,7 @@ namespace TextEditorApp.CustomControl
                 else
                 {
                     //Set content for rtb
-                    rtbContent.Text = e.Result.ToString();
+                    rtbContent.Text = e.Result.ToString().Replace("\0", "");
                     lblResult.Text = "Read file successfully!";
                 }
             }
@@ -226,10 +227,9 @@ namespace TextEditorApp.CustomControl
 
         void bgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            bool isWrite = (bool)e.Argument;
             if (isWrite)
             {
-                e.Result = FileUtils.WriteTextToFileAsync(rtbContent.Text, saveTextFileDialog.FileName, bgWorker, e);
+                e.Result = FileUtils.WriteTextToFileAsync(textContent, saveTextFileDialog.FileName, bgWorker, e);
             }
             else
             {
@@ -246,7 +246,8 @@ namespace TextEditorApp.CustomControl
                 this.btnSave.Enabled = false;
 
                 isWrite = false;
-                bgWorker.RunWorkerAsync(isWrite);
+                prgBar.Value = 0;
+                bgWorker.RunWorkerAsync();
             }
         }
 
@@ -255,7 +256,9 @@ namespace TextEditorApp.CustomControl
             if (saveTextFileDialog.ShowDialog() == DialogResult.OK)
             {
                 isWrite = true;
-                bgWorker.RunWorkerAsync(isWrite);
+                prgBar.Value = 0;
+                textContent = rtbContent.Text;
+                bgWorker.RunWorkerAsync();
             }
         }
     }

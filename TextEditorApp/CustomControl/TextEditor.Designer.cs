@@ -166,6 +166,7 @@
             this.prgBar.Name = "prgBar";
             this.prgBar.Size = new System.Drawing.Size(585, 23);
             this.prgBar.Step = 1;
+            this.prgBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.prgBar.TabIndex = 3;
             this.prgBar.UseWaitCursor = true;
             // 

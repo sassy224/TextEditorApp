@@ -58,6 +58,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\ArrayExtension.cs" />
     <Compile Include="Utilities\FileUtils.cs" />
     <Compile Include="Utilities\ListUtils.cs" />
     <EmbeddedResource Include="CustomControl\TextEditor.resx">
