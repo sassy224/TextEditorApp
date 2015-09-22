@@ -25,6 +25,9 @@ namespace TextEditorApp.CustomControl
         {
             //Init background worker
             InitializeBackgroundWorker();
+
+            //Init drag and drop for richtextbox
+            InitializeDragDrop();
         }
 
         private void InitializeBackgroundWorker()
@@ -32,6 +35,44 @@ namespace TextEditorApp.CustomControl
             bgWorker.DoWork += bgWorker_DoWork;
             bgWorker.RunWorkerCompleted += bgWorker_RunWorkerCompleted;
             bgWorker.ProgressChanged += bgWorker_ProgressChanged;
+        }
+
+        private void InitializeDragDrop()
+        {
+            rtbContent.AllowDrop = true;
+            rtbContent.DragEnter += rtbContent_DragEnter;
+            rtbContent.DragDrop += rtbContent_DragDrop;
+        }
+
+        void rtbContent_DragDrop(object sender, DragEventArgs e)
+        {
+            //Get data of the files dropped in
+            object fileData = e.Data.GetData("FileDrop");
+            if (fileData != null)
+            {
+                //Get list file paths
+                var fileNames = fileData as string[];
+
+                //Only read the first file
+                if (fileNames != null && !string.IsNullOrWhiteSpace(fileNames[0]))
+                {
+                    rtbContent.Clear();
+                    //rtbContent.LoadFile(list[0], RichTextBoxStreamType.PlainText);
+                    StartReadFile(fileNames[0]);
+                }
+            }
+        }
+
+        void rtbContent_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
         }
 
         void bgWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -96,13 +137,14 @@ namespace TextEditorApp.CustomControl
 
         void bgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            string fileName = (string)e.Argument;
             if (isWrite)
             {
-                e.Result = FileUtils.WriteTextToFileAsync(textContent, saveTextFileDialog.FileName, bgWorker, e);
+                e.Result = FileUtils.WriteTextToFileAsync(textContent, fileName, bgWorker);
             }
             else
             {
-                e.Result = FileUtils.ReadTextContentAsync(openTextFileDialog.FileName, bgWorker, e);
+                e.Result = FileUtils.ReadTextContentAsync(fileName, bgWorker);
             }
         }
 
@@ -110,13 +152,7 @@ namespace TextEditorApp.CustomControl
         {
             if (openTextFileDialog.ShowDialog() == DialogResult.OK)
             {
-                //Disable controls
-                this.btnOpen.Enabled = false;
-                this.btnSave.Enabled = false;
-
-                isWrite = false;
-                prgBar.Value = 0;
-                bgWorker.RunWorkerAsync();
+                StartReadFile(openTextFileDialog.FileName);
             }
         }
 
@@ -124,11 +160,31 @@ namespace TextEditorApp.CustomControl
         {
             if (saveTextFileDialog.ShowDialog() == DialogResult.OK)
             {
-                isWrite = true;
-                prgBar.Value = 0;
-                textContent = rtbContent.Text;
-                bgWorker.RunWorkerAsync();
+                StartSaveFile(saveTextFileDialog.FileName);
             }
+        }
+
+        private void StartReadFile(string fileName)
+        {
+            //Disable controls
+            this.btnOpen.Enabled = false;
+            this.btnSave.Enabled = false;
+
+            isWrite = false;
+            prgBar.Value = 0;
+            bgWorker.RunWorkerAsync(fileName);
+        }
+
+        private void StartSaveFile(string fileName)
+        {
+            //Disable controls
+            this.btnOpen.Enabled = false;
+            this.btnSave.Enabled = false;
+
+            isWrite = true;
+            prgBar.Value = 0;
+            textContent = rtbContent.Text;
+            bgWorker.RunWorkerAsync(fileName);
         }
     }
 }

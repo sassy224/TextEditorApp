@@ -10,7 +10,13 @@ namespace TextEditorApp.Utilities
 {
     class FileUtils
     {
-        public static string ReadTextContentAsync(string filePath, BackgroundWorker worker, DoWorkEventArgs e)
+        /// <summary>
+        /// Read text content from a file asynchronously
+        /// </summary>
+        /// <param name="filePath">Full path to file</param>
+        /// <param name="worker">BackgroundWorker object</param>
+        /// <returns>The string content of the file</returns>
+        public static string ReadTextContentAsync(string filePath, BackgroundWorker worker)
         {
             try
             {
@@ -65,35 +71,83 @@ namespace TextEditorApp.Utilities
             }
         }
 
-        public static bool WriteTextToFileAsync(string textContent, string filePath, BackgroundWorker worker, DoWorkEventArgs e)
+        /// <summary>
+        /// Write text string to a file asynchronously
+        /// </summary>
+        /// <param name="textContent">Text string to be written to file</param>
+        /// <param name="filePath">Full path to file</param>
+        /// <param name="worker">BackgroundWorker object</param>
+        /// <returns>True if success, Exception otherwise</returns>
+        public static bool WriteTextToFileAsync(string textContent, string filePath, BackgroundWorker worker)
         {
             try
             {
                 //Convert string to bytes
                 byte[] bytesArray = GetBytes(textContent);
-                //Split into 100 smaller arrays
-                var splitArrays = bytesArray.Split(bytesArray.Length / 100);
-                int percentage = 0;
 
-                using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write))
+                if (bytesArray.Length < 1024 * 1024 * 10) //10Mb
                 {
-                    foreach (var arr in splitArrays)
-                    {
-                        fs.Write(arr.ToArray(), 0, arr.Count());
-                        percentage += 1;
-                        if (percentage > 100)
-                            percentage = 100;
-                        worker.ReportProgress(percentage);
-                    }
-
-                    fs.Flush();
-                    fs.Close();
+                    WriteSmallFile(bytesArray, filePath);
                 }
+                else
+                {
+                    WriteBigFileAsync(bytesArray, filePath, worker);
+                }
+
                 return true;
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Write small file, use FileStream to write all bytes to file right away.
+        /// Since this will be finished in an instance, no need to use BackgroundWorker to report progress
+        /// </summary>
+        /// <param name="bytesArray">Array of bytes to be written to file</param>
+        /// <param name="filePath">Full path to file</param>
+        private static void WriteSmallFile(byte[] bytesArray, string filePath)
+        {
+            using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+            {
+                fs.Write(bytesArray, 0, bytesArray.Length);
+                fs.Flush();
+                fs.Close();
+            }
+        }
+
+        /// <summary>
+        /// Write big file, split the byte array into smaller arrays (chunks), then write them in sequence to the file.
+        /// Since this might take some times, use a BackgroundWorker to report progress
+        /// </summary>
+        /// <param name="bytesArray">Array of bytes to be written to file</param>
+        /// <param name="filePath">Full path to file</param>
+        /// <param name="worker">BackgroundWorker object</param>
+        private static void WriteBigFileAsync(byte[] bytesArray, string filePath, BackgroundWorker worker)
+        {
+            //Split into 100 smaller arrays
+            var chunks = bytesArray.Split(bytesArray.Length / 100);
+            int percentage = 0;
+
+            using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+            {
+                foreach (var chunk in chunks)
+                {
+                    fs.Write(chunk.ToArray(), 0, chunk.Count());
+
+                    if (worker != null)
+                    {
+                        percentage += 1;
+                        if (percentage > 100)
+                            percentage = 100;
+                        worker.ReportProgress(percentage);
+                    }
+                }
+
+                fs.Flush();
+                fs.Close();
             }
         }
 
