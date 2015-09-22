@@ -38,7 +38,6 @@
             this.textEditor1.Name = "textEditor1";
             this.textEditor1.Size = new System.Drawing.Size(647, 533);
             this.textEditor1.TabIndex = 0;
-            this.textEditor1.Load += new System.EventHandler(this.textEditor1_Load);
             // 
             // Form1
             // 

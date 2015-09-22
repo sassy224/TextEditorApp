@@ -85,7 +85,6 @@
             this.btnSave.TabIndex = 2;
             this.btnSave.Text = "Save text file";
             this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // btnOpen
             // 
@@ -96,7 +95,6 @@
             this.btnOpen.TabIndex = 1;
             this.btnOpen.Text = "Open text file";
             this.btnOpen.UseVisualStyleBackColor = true;
-            this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
             // 
             // rtbContent
             // 

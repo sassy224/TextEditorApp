@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TextEditorApp.Mediator;
 
 namespace TextEditorApp
 {
@@ -14,12 +15,17 @@ namespace TextEditorApp
     {
         public Form1()
         {
+            //Init form
             InitializeComponent();
-        }
 
-        private void textEditor1_Load(object sender, EventArgs e)
-        {
+            //Init mediator
+            IEditorMediator mediator = new EditorMediator(textEditor1);
 
+            //Delegate event handlers to mediator
+            textEditor1.CustomDragEnter += mediator.HandleCustomDragEnter;
+            textEditor1.CustomDragDrop += mediator.HandleCustomDragDrop;
+            textEditor1.OpenButtonClick += mediator.HandleOpenButtonClick;
+            textEditor1.SaveButtonClick += mediator.HandleSaveButtonClick;
         }
     }
 }

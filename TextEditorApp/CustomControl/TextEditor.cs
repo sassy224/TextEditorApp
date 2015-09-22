@@ -11,7 +11,7 @@ using TextEditorApp.Utilities;
 
 namespace TextEditorApp.CustomControl
 {
-    public partial class TextEditor : UserControl
+    public partial class TextEditor : UserControl, IEditorControl
     {
         private bool isWrite = false;
         private string textContent = String.Empty;
@@ -23,11 +23,20 @@ namespace TextEditorApp.CustomControl
 
         private void TextEditor_Load(object sender, EventArgs e)
         {
+            //Init events
+            InitEvents();
+
             //Init background worker
             InitializeBackgroundWorker();
 
             //Init drag and drop for richtextbox
             InitializeDragDrop();
+        }
+
+        private void InitEvents()
+        {
+            this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
         }
 
         private void InitializeBackgroundWorker()
@@ -46,32 +55,52 @@ namespace TextEditorApp.CustomControl
 
         void rtbContent_DragDrop(object sender, DragEventArgs e)
         {
-            //Get data of the files dropped in
-            object fileData = e.Data.GetData("FileDrop");
-            if (fileData != null)
+            if (CustomDragDrop != null)
             {
-                //Get list file paths
-                var fileNames = fileData as string[];
-
-                //Only read the first file
-                if (fileNames != null && !string.IsNullOrWhiteSpace(fileNames[0]))
+                //There's already a custom implementation, use it
+                //Raise event to notify the subscribers of this event
+                CustomDragDrop(sender, e);
+            }
+            else
+            {
+                //There's no custom implementation, use default implementation of this control
+                //Get data of the files dropped in
+                object fileData = e.Data.GetData("FileDrop");
+                if (fileData != null)
                 {
-                    rtbContent.Clear();
-                    //rtbContent.LoadFile(list[0], RichTextBoxStreamType.PlainText);
-                    StartReadFile(fileNames[0]);
+                    //Get list file paths
+                    var fileNames = fileData as string[];
+
+                    //Only read the first file
+                    if (fileNames != null && !string.IsNullOrWhiteSpace(fileNames[0]))
+                    {
+                        rtbContent.Clear();
+                        //rtbContent.LoadFile(list[0], RichTextBoxStreamType.PlainText);
+                        StartReadFile(fileNames[0]);
+                    }
                 }
             }
         }
 
         void rtbContent_DragEnter(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (CustomDragEnter != null)
             {
-                e.Effect = DragDropEffects.Copy;
+                //There's already a custom implementation, use it
+                //Raise event to notify the subscribers of this event
+                CustomDragEnter(sender, e);
             }
             else
             {
-                e.Effect = DragDropEffects.None;
+                //There's no custom implementation, use default implementation
+                if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                {
+                    e.Effect = DragDropEffects.Copy;
+                }
+                else
+                {
+                    e.Effect = DragDropEffects.None;
+                }
             }
         }
 
@@ -150,17 +179,37 @@ namespace TextEditorApp.CustomControl
 
         private void btnOpen_Click(object sender, EventArgs e)
         {
-            if (openTextFileDialog.ShowDialog() == DialogResult.OK)
+            if (OpenButtonClick != null)
             {
-                StartReadFile(openTextFileDialog.FileName);
+                //There's already a custom implementation, use it
+                //Raise event to notify the subscribers of this event
+                OpenButtonClick(sender, e);
+            }
+            else
+            {
+                //There's no custom implementation, use default implementation
+                if (openTextFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    StartReadFile(openTextFileDialog.FileName);
+                }
             }
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (saveTextFileDialog.ShowDialog() == DialogResult.OK)
+            if (SaveButtonClick != null)
             {
-                StartSaveFile(saveTextFileDialog.FileName);
+                //There's already a custom implementation, use it
+                //Raise event to notify the subscribers of this event
+                SaveButtonClick(sender, e);
+            }
+            else
+            {
+                //There's no custom implementation, use default implementation
+                if (saveTextFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    StartSaveFile(saveTextFileDialog.FileName);
+                }
             }
         }
 
@@ -185,6 +234,53 @@ namespace TextEditorApp.CustomControl
             prgBar.Value = 0;
             textContent = rtbContent.Text;
             bgWorker.RunWorkerAsync(fileName);
+        }
+
+        /* Interface implementation */
+        public event DragEventHandler CustomDragEnter;
+
+        public event DragEventHandler CustomDragDrop;
+
+        public event EventHandler OpenButtonClick;
+
+        public event EventHandler SaveButtonClick;
+
+        public void UpdateProgress(int percentage, object additionalData = null)
+        {
+            prgBar.Value = percentage;
+            lblResult.Text = percentage + "%";
+        }
+
+        public void SetLabelResultText(string text)
+        {
+            lblResult.Text = text;
+        }
+
+        public void SetTextForEditor(string text)
+        {
+            if (String.IsNullOrEmpty(text))
+                rtbContent.Clear();
+            else
+                rtbContent.Text = text;
+        }
+
+        public string GetTextOfEditor()
+        {
+            return rtbContent.Text;
+        }
+
+        public void DisableControls()
+        {
+            btnOpen.Enabled = false;
+            btnSave.Enabled = false;
+            rtbContent.Enabled = false;
+        }
+
+        public void EnableControls()
+        {
+            btnOpen.Enabled = true;
+            btnSave.Enabled = true;
+            rtbContent.Enabled = true;
         }
     }
 }

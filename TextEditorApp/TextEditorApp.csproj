@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomControl\IEditorControl.cs" />
     <Compile Include="CustomControl\TextEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -56,6 +57,9 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Mediator\EditorMediator.cs" />
+    <Compile Include="Mediator\IEditorMediator.cs" />
+    <Compile Include="Model\FileOperationArgument.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\ArrayExtension.cs" />
