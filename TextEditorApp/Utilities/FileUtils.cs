@@ -28,7 +28,8 @@ namespace TextEditorApp.Utilities
                 long incrementSize = (totalSize / 100);
 
                 // Open the text file with open filemode access.
-                using(StreamReader stream = new StreamReader(new FileStream(filePath, FileMode.Open))){
+                using (StreamReader stream = new StreamReader(new FileStream(filePath, FileMode.Open)))
+                {
                     // This buffer is only 100 characters long so we process the file in 100 char chunks.
                     // We could have boosted this up, but we want a slow process to show the slow progress.
                     char[] buff = new char[100];
@@ -56,8 +57,6 @@ namespace TextEditorApp.Utilities
                         }
                     }
                 }
-                //Set to 100%
-                worker.ReportProgress(100);
                 return sb.ToString();
             }
             catch (Exception ex)
@@ -90,7 +89,6 @@ namespace TextEditorApp.Utilities
                     fs.Flush();
                     fs.Close();
                 }
-                worker.ReportProgress(100);
                 return true;
             }
             catch (Exception ex)
