@@ -21,6 +21,8 @@ namespace TextEditorApp.CustomControl
             InitializeComponent();
         }
 
+        #region Default implementation
+
         private void TextEditor_Load(object sender, EventArgs e)
         {
             //Init events
@@ -236,7 +238,12 @@ namespace TextEditorApp.CustomControl
             bgWorker.RunWorkerAsync(fileName);
         }
 
+        #endregion Default implementation
+
         /* Interface implementation */
+
+        #region Public events
+
         public event DragEventHandler CustomDragEnter;
 
         public event DragEventHandler CustomDragDrop;
@@ -245,28 +252,14 @@ namespace TextEditorApp.CustomControl
 
         public event EventHandler SaveButtonClick;
 
+        #endregion Public events
+
+        #region Public methods and properties
+
         public void UpdateProgress(int percentage, object additionalData = null)
         {
             prgBar.Value = percentage;
             lblResult.Text = percentage + "%";
-        }
-
-        public void SetResultText(string text)
-        {
-            lblResult.Text = text;
-        }
-
-        public void SetTextForEditor(string text)
-        {
-            if (String.IsNullOrEmpty(text))
-                rtbContent.Clear();
-            else
-                rtbContent.Text = text;
-        }
-
-        public string GetTextOfEditor()
-        {
-            return rtbContent.Text;
         }
 
         public void DisableControls()
@@ -366,5 +359,7 @@ namespace TextEditorApp.CustomControl
                 rtbContent.Text = value;
             }
         }
+
+        #endregion Public methods and properties
     }
 }
