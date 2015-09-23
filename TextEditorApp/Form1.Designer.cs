@@ -33,9 +33,16 @@
             // 
             // textEditor1
             // 
+            this.textEditor1.AllowDragDropTextFile = true;
+            this.textEditor1.BodyContentText = "Default text";
             this.textEditor1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textEditor1.LabelResultText = "";
             this.textEditor1.Location = new System.Drawing.Point(0, 0);
             this.textEditor1.Name = "textEditor1";
+            this.textEditor1.OpenButtonText = "Custom Open";
+            this.textEditor1.SaveButtonText = "Custom Save";
+            this.textEditor1.ShowOpenButton = true;
+            this.textEditor1.ShowSaveButton = true;
             this.textEditor1.Size = new System.Drawing.Size(647, 533);
             this.textEditor1.TabIndex = 0;
             // 

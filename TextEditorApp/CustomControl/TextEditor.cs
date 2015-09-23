@@ -11,7 +11,7 @@ using TextEditorApp.Utilities;
 
 namespace TextEditorApp.CustomControl
 {
-    public partial class TextEditor : UserControl, IEditorControl
+    public partial class TextEditor : UserControl, ITextEditorControl
     {
         private bool isWrite = false;
         private string textContent = String.Empty;
@@ -30,7 +30,8 @@ namespace TextEditorApp.CustomControl
             InitializeBackgroundWorker();
 
             //Init drag and drop for richtextbox
-            InitializeDragDrop();
+            if (AllowDragDropTextFile)
+                InitializeDragDrop();
         }
 
         private void InitEvents()
@@ -48,7 +49,6 @@ namespace TextEditorApp.CustomControl
 
         private void InitializeDragDrop()
         {
-            rtbContent.AllowDrop = true;
             rtbContent.DragEnter += rtbContent_DragEnter;
             rtbContent.DragDrop += rtbContent_DragDrop;
         }
@@ -251,7 +251,7 @@ namespace TextEditorApp.CustomControl
             lblResult.Text = percentage + "%";
         }
 
-        public void SetLabelResultText(string text)
+        public void SetResultText(string text)
         {
             lblResult.Text = text;
         }
@@ -281,6 +281,90 @@ namespace TextEditorApp.CustomControl
             btnOpen.Enabled = true;
             btnSave.Enabled = true;
             rtbContent.Enabled = true;
+        }
+
+        public bool AllowDragDropTextFile
+        {
+            get
+            {
+                return rtbContent.AllowDrop;
+            }
+            set
+            {
+                rtbContent.AllowDrop = value;
+            }
+        }
+
+        public bool ShowOpenButton
+        {
+            get
+            {
+                return btnOpen.Visible;
+            }
+            set
+            {
+                btnOpen.Visible = value;
+            }
+        }
+
+        public bool ShowSaveButton
+        {
+            get
+            {
+                return btnSave.Visible;
+            }
+            set
+            {
+                btnSave.Visible = value;
+            }
+        }
+
+        public string OpenButtonText
+        {
+            get
+            {
+                return btnOpen.Text;
+            }
+            set
+            {
+                btnOpen.Text = value;
+            }
+        }
+
+        public string SaveButtonText
+        {
+            get
+            {
+                return btnSave.Text;
+            }
+            set
+            {
+                btnSave.Text = value;
+            }
+        }
+
+        public string LabelResultText
+        {
+            get
+            {
+                return lblResult.Text;
+            }
+            set
+            {
+                lblResult.Text = value;
+            }
+        }
+
+        public string BodyContentText
+        {
+            get
+            {
+                return rtbContent.Text;
+            }
+            set
+            {
+                rtbContent.Text = value;
+            }
         }
     }
 }

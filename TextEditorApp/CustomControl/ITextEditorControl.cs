@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace TextEditorApp.CustomControl
 {
-    public interface IEditorControl
+    public interface ITextEditorControl
     {
         //Occurs when an object is dragged into the control's bounds.
         event DragEventHandler CustomDragEnter;
@@ -22,16 +22,31 @@ namespace TextEditorApp.CustomControl
         //Update progress bar of this control
         void UpdateProgress(int percentage, object additionalData = null);
 
-        //Set text for label result of this control
-        void SetLabelResultText(string text);
-
-        //Set text for the editor's body
-        void SetTextForEditor(string text);
-
-        string GetTextOfEditor();
-
+        //Disable all chilren controls
         void DisableControls();
 
+        //Enable all children controls
         void EnableControls();
+
+        //Allow drag & drop text file
+        bool AllowDragDropTextFile { get; set; }
+
+        //Show or hide Open button
+        bool ShowOpenButton { get; set; }
+
+        //Show or hide Save button
+        bool ShowSaveButton { get; set; }
+
+        //Text on Open button
+        string OpenButtonText { get; set; }
+
+        //Text on Save button
+        string SaveButtonText { get; set; }
+
+        //Text on label result
+        string LabelResultText { get; set; }
+
+        //Text on editor's text control
+        string BodyContentText { get; set; }
     }
 }

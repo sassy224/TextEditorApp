@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TextEditorApp.Utilities
 {
-    class FileUtils
+    public class FileUtils
     {
         /// <summary>
         /// Read text content from a file asynchronously

@@ -13,13 +13,13 @@ namespace TextEditorApp.Mediator
 {
     public class EditorMediator : IEditorMediator
     {
-        private IEditorControl editorControl = null;
+        private ITextEditorControl editorControl = null;
         private OpenFileDialog openTextFileDialog;
         private SaveFileDialog saveTextFileDialog;
         private BackgroundWorker bgWorker;
         private bool isWrite = false;
 
-        public EditorMediator(IEditorControl control)
+        public EditorMediator(ITextEditorControl control)
         {
             //editorControl
             editorControl = control;
@@ -79,7 +79,7 @@ namespace TextEditorApp.Mediator
                 //Only read the first file
                 if (fileNames != null && !string.IsNullOrWhiteSpace(fileNames[0]))
                 {
-                    editorControl.SetTextForEditor(String.Empty);
+                    editorControl.BodyContentText = String.Empty;
                     //rtbContent.LoadFile(list[0], RichTextBoxStreamType.PlainText);
                     StartReadFile(fileNames[0]);
                 }
@@ -125,7 +125,7 @@ namespace TextEditorApp.Mediator
             // First, handle the case where an exception was thrown.
             if (e.Error != null)
             {
-                editorControl.SetLabelResultText(e.Error.Message);
+                editorControl.LabelResultText = e.Error.Message;
             }
             else if (e.Cancelled)
             {
@@ -135,7 +135,7 @@ namespace TextEditorApp.Mediator
                 // the DoWork event handler, the Cancelled
                 // flag may not have been set, even though
                 // CancelAsync was called.
-                editorControl.SetLabelResultText("Canceled");
+                editorControl.LabelResultText = "Canceled";
             }
             else
             {
@@ -144,13 +144,13 @@ namespace TextEditorApp.Mediator
 
                 if (isWrite)
                 {
-                    editorControl.SetLabelResultText("Write file successfully!");
+                    editorControl.LabelResultText = "Write file successfully!";
                 }
                 else
                 {
                     //Set content for rtb
-                    editorControl.SetTextForEditor(e.Result.ToString().Replace("\0", ""));
-                    editorControl.SetLabelResultText("Read file successfully!");
+                    editorControl.BodyContentText = e.Result.ToString().Replace("\0", "");
+                    editorControl.LabelResultText = "Read file successfully!";
                 }
             }
 
@@ -193,7 +193,7 @@ namespace TextEditorApp.Mediator
             {
                 editorControl.UpdateProgress(e.ProgressPercentage + 1);
             }
-            //Set corrent value
+            //Update progress of control
             editorControl.UpdateProgress(e.ProgressPercentage);
         }
 
@@ -226,7 +226,7 @@ namespace TextEditorApp.Mediator
             editorControl.UpdateProgress(0, null);
 
             isWrite = true;
-            FileOperationArgument foa = new FileOperationArgument(fileName, isWrite, editorControl.GetTextOfEditor());
+            FileOperationArgument foa = new FileOperationArgument(fileName, isWrite, editorControl.BodyContentText);
             bgWorker.RunWorkerAsync(foa);
         }
     }

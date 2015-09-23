@@ -26,6 +26,9 @@ namespace TextEditorApp
             textEditor1.CustomDragDrop += mediator.HandleCustomDragDrop;
             textEditor1.OpenButtonClick += mediator.HandleOpenButtonClick;
             textEditor1.SaveButtonClick += mediator.HandleSaveButtonClick;
+
+            //Uncomment to disable drag n drop
+            //textEditor1.AllowDragDropTextFile = false;
         }
     }
 }
