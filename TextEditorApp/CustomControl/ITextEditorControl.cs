@@ -48,5 +48,8 @@ namespace TextEditorApp.CustomControl
 
         //Text on editor's text control
         string BodyContentText { get; set; }
+
+        //Append text to editor's text control
+        void AppendBodyContent(string text);
     }
 }

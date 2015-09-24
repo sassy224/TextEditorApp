@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TextEditorApp.CustomControl;
@@ -11,7 +12,7 @@ using TextEditorApp.Utilities;
 
 namespace TextEditorApp.Mediator
 {
-    public class EditorMediator : IEditorMediator
+    public class EditorMediator : IEditorMediator, IDisposable
     {
         private ITextEditorControl editorControl = null;
         private OpenFileDialog openTextFileDialog;
@@ -149,7 +150,7 @@ namespace TextEditorApp.Mediator
                 else
                 {
                     //Set content for rtb
-                    editorControl.BodyContentText = e.Result.ToString().Replace("\0", "");
+                    //editorControl.BodyContentText = e.Result.ToString();
                     editorControl.LabelResultText = "Read file successfully!";
                 }
             }
@@ -172,7 +173,7 @@ namespace TextEditorApp.Mediator
             }
             else
             {
-                e.Result = FileUtils.ReadTextContentAsync(foa.FilePath, bgWorker);
+                FileUtils.ReadTextContentAsync(foa.FilePath, bgWorker);
             }
         }
 
@@ -194,7 +195,7 @@ namespace TextEditorApp.Mediator
                 editorControl.UpdateProgress(e.ProgressPercentage + 1);
             }
             //Update progress of control
-            editorControl.UpdateProgress(e.ProgressPercentage);
+            editorControl.UpdateProgress(e.ProgressPercentage, e.UserState);
         }
 
         /// <summary>
@@ -228,6 +229,38 @@ namespace TextEditorApp.Mediator
             isWrite = true;
             FileOperationArgument foa = new FileOperationArgument(fileName, isWrite, editorControl.BodyContentText);
             bgWorker.RunWorkerAsync(foa);
+        }
+
+        private bool _disposed = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    if (openTextFileDialog != null) openTextFileDialog.Dispose();
+                    if (saveTextFileDialog != null) saveTextFileDialog.Dispose();
+                    if (bgWorker != null) bgWorker.Dispose();
+                }
+
+                // Now disposed of any unmanaged objects
+                // ...
+
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        // Destructor
+        ~EditorMediator()
+        {
+            Dispose(false);
         }
     }
 }

@@ -33,7 +33,7 @@
             this.prgBar = new System.Windows.Forms.ProgressBar();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnOpen = new System.Windows.Forms.Button();
-            this.rtbContent = new System.Windows.Forms.RichTextBox();
+            this.txtContent = new System.Windows.Forms.TextBox();
             this.openTextFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveTextFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.bgWorker = new System.ComponentModel.BackgroundWorker();
@@ -46,7 +46,7 @@
             this.panel1.Controls.Add(this.prgBar);
             this.panel1.Controls.Add(this.btnSave);
             this.panel1.Controls.Add(this.btnOpen);
-            this.panel1.Controls.Add(this.rtbContent);
+            this.panel1.Controls.Add(this.txtContent);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
@@ -68,6 +68,7 @@
             // 
             this.prgBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.prgBar.Cursor = System.Windows.Forms.Cursors.WaitCursor;
             this.prgBar.Location = new System.Drawing.Point(13, 474);
             this.prgBar.Name = "prgBar";
             this.prgBar.Size = new System.Drawing.Size(585, 23);
@@ -96,16 +97,18 @@
             this.btnOpen.Text = "Open text file";
             this.btnOpen.UseVisualStyleBackColor = true;
             // 
-            // rtbContent
+            // txtContent
             // 
-            this.rtbContent.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.txtContent.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.rtbContent.Location = new System.Drawing.Point(4, 3);
-            this.rtbContent.Name = "rtbContent";
-            this.rtbContent.Size = new System.Drawing.Size(605, 408);
-            this.rtbContent.TabIndex = 0;
-            this.rtbContent.Text = "";
+            this.txtContent.Location = new System.Drawing.Point(4, 3);
+            this.txtContent.MaxLength = 0;
+            this.txtContent.Multiline = true;
+            this.txtContent.Name = "txtContent";
+            this.txtContent.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtContent.Size = new System.Drawing.Size(605, 408);
+            this.txtContent.TabIndex = 0;
             // 
             // openTextFileDialog
             // 
@@ -141,7 +144,7 @@
         #endregion
 
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.RichTextBox rtbContent;
+        private System.Windows.Forms.TextBox txtContent;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnOpen;
         private System.Windows.Forms.ProgressBar prgBar;

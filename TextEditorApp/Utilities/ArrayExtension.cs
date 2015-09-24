@@ -17,6 +17,10 @@ namespace TextEditorApp.Utilities
         /// <returns>An array containing smaller arrays.</returns>
         public static IEnumerable<IEnumerable<T>> Split<T>(this T[] array, int size)
         {
+            //If size to be splitted > length of array, return this array as the only member of the splitted array
+            if (size > array.Length)
+                yield return array;
+
             for (var i = 0; i < (float)array.Length / size; i++)
             {
                 yield return array.Skip(i * size).Take(size);

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TextEditorApp.Model;
 using TextEditorApp.Utilities;
 
 namespace TextEditorApp.CustomControl
@@ -51,8 +52,8 @@ namespace TextEditorApp.CustomControl
 
         private void InitializeDragDrop()
         {
-            rtbContent.DragEnter += rtbContent_DragEnter;
-            rtbContent.DragDrop += rtbContent_DragDrop;
+            txtContent.DragEnter += rtbContent_DragEnter;
+            txtContent.DragDrop += rtbContent_DragDrop;
         }
 
         void rtbContent_DragDrop(object sender, DragEventArgs e)
@@ -76,7 +77,7 @@ namespace TextEditorApp.CustomControl
                     //Only read the first file
                     if (fileNames != null && !string.IsNullOrWhiteSpace(fileNames[0]))
                     {
-                        rtbContent.Clear();
+                        txtContent.Clear();
                         //rtbContent.LoadFile(list[0], RichTextBoxStreamType.PlainText);
                         StartReadFile(fileNames[0]);
                     }
@@ -156,7 +157,7 @@ namespace TextEditorApp.CustomControl
                 else
                 {
                     //Set content for rtb
-                    rtbContent.Text = e.Result.ToString().Replace("\0", "");
+                    txtContent.Text = e.Result.ToString().Replace("\0", "");
                     lblResult.Text = "Read file successfully!";
                 }
             }
@@ -175,7 +176,7 @@ namespace TextEditorApp.CustomControl
             }
             else
             {
-                e.Result = FileUtils.ReadTextContentAsync(fileName, bgWorker);
+                FileUtils.ReadTextContentAsync(fileName, bgWorker);
             }
         }
 
@@ -234,7 +235,7 @@ namespace TextEditorApp.CustomControl
 
             isWrite = true;
             prgBar.Value = 0;
-            textContent = rtbContent.Text;
+            textContent = txtContent.Text;
             bgWorker.RunWorkerAsync(fileName);
         }
 
@@ -258,33 +259,42 @@ namespace TextEditorApp.CustomControl
 
         public void UpdateProgress(int percentage, object additionalData = null)
         {
+            this.SuspendLayout();
             prgBar.Value = percentage;
             lblResult.Text = percentage + "%";
+
+            //Append text to editor
+            if (additionalData != null)
+            {
+                FileOperationArgument foa = (FileOperationArgument)additionalData;
+                txtContent.AppendText(foa.FileContent);
+            }
+            this.ResumeLayout(false);
         }
 
         public void DisableControls()
         {
             btnOpen.Enabled = false;
             btnSave.Enabled = false;
-            rtbContent.Enabled = false;
+            txtContent.Enabled = false;
         }
 
         public void EnableControls()
         {
             btnOpen.Enabled = true;
             btnSave.Enabled = true;
-            rtbContent.Enabled = true;
+            txtContent.Enabled = true;
         }
 
         public bool AllowDragDropTextFile
         {
             get
             {
-                return rtbContent.AllowDrop;
+                return txtContent.AllowDrop;
             }
             set
             {
-                rtbContent.AllowDrop = value;
+                txtContent.AllowDrop = value;
             }
         }
 
@@ -352,12 +362,17 @@ namespace TextEditorApp.CustomControl
         {
             get
             {
-                return rtbContent.Text;
+                return txtContent.Text;
             }
             set
             {
-                rtbContent.Text = value;
+                txtContent.Text = value;
             }
+        }
+
+        public void AppendBodyContent(string text)
+        {
+            txtContent.AppendText(text);
         }
 
         #endregion Public methods and properties

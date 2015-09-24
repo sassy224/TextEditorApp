@@ -4,19 +4,20 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using TextEditorApp.Model;
 
 namespace TextEditorApp.Utilities
 {
-    public class FileUtils
+    public static class FileUtils
     {
         /// <summary>
-        /// Read text content from a file asynchronously
+        /// Read text content from a file asynchronously and report pieces of text back for appending
         /// </summary>
         /// <param name="filePath">Full path to file</param>
         /// <param name="worker">BackgroundWorker object</param>
-        /// <returns>The string content of the file</returns>
-        public static string ReadTextContentAsync(string filePath, BackgroundWorker worker)
+        public static void ReadTextContentAsync(string filePath, BackgroundWorker worker)
         {
             try
             {
@@ -32,42 +33,61 @@ namespace TextEditorApp.Utilities
                 long currentSize = 0;
                 long currentTotalSize = 0;
                 long incrementSize = (totalSize / 100);
+                FileOperationArgument foa;
 
                 // Open the text file with open filemode access.
-                using (StreamReader stream = new StreamReader(new FileStream(filePath, FileMode.Open)))
+                using (FileStream fs = new FileStream(filePath, FileMode.Open))
                 {
-                    // This buffer is only 100 characters long so we process the file in 100 char chunks.
-                    // We could have boosted this up, but we want a slow process to show the slow progress.
-                    char[] buff = new char[100];
-                    int len = buff.Length;
-
-                    // Read through the file until end of file
-                    while (!stream.EndOfStream)
+                    using (StreamReader stream = new StreamReader(fs))
                     {
-                        // Add to the current position in the file
-                        currentSize += stream.Read(buff, 0, buff.Length);
-                        sb.Append(buff);
-                        Array.Clear(buff, 0, buff.Length);
+                        // This buffer is only 100 characters long so we process the file in 100 char chunks.
+                        // We could have boosted this up, but we want a slow process to show the slow progress.
+                        char[] buff = new char[100];
+                        int len = buff.Length;
 
-                        // Once we hit a milestone, subtract the milestone value and
-                        // call our delegate we defined above.
-                        if (currentSize >= incrementSize)
+                        // Read through the file until end of file
+                        while (!stream.EndOfStream)
                         {
-                            currentTotalSize += currentSize;
-                            currentSize -= incrementSize;
+                            // Add to the current position in the file
+                            currentSize += stream.Read(buff, 0, buff.Length);
 
-                            int percentComplete = (int)((float)currentTotalSize / (float)totalSize * 100);
-                            if (percentComplete > 100)
-                                percentComplete = 100;
-                            worker.ReportProgress(percentComplete);
+                            //Remove "\0"
+                            sb.Append(RemoveSpecialChars(buff));
+                            Array.Clear(buff, 0, buff.Length);
+
+                            // Once we hit a milestone, subtract the milestone value and
+                            // call our delegate we defined above.
+                            if (currentSize >= incrementSize)
+                            {
+                                currentTotalSize += currentSize;
+                                currentSize -= incrementSize;
+
+                                int percentComplete = (int)((float)currentTotalSize / (float)totalSize * 100);
+                                if (percentComplete > 100)
+                                    percentComplete = 100;
+
+                                foa = new FileOperationArgument(String.Empty, false, sb.ToString());
+                                worker.ReportProgress(percentComplete, foa);
+
+                                //Reset string builder
+                                sb = new StringBuilder();
+                                //Sleep 100ms to let UI update
+                                Thread.Sleep(200);
+                            }
                         }
                     }
                 }
-                return sb.ToString();
+
+                foa = new FileOperationArgument(String.Empty, false, sb.ToString());
+                worker.ReportProgress(100, foa);
+                Thread.Sleep(200);
+
+                //Free memory
+                sb = null;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -94,11 +114,14 @@ namespace TextEditorApp.Utilities
                     WriteBigFileAsync(bytesArray, filePath, worker);
                 }
 
+                //Free memory
+                bytesArray = null;
+
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -114,7 +137,6 @@ namespace TextEditorApp.Utilities
             {
                 fs.Write(bytesArray, 0, bytesArray.Length);
                 fs.Flush();
-                fs.Close();
             }
         }
 
@@ -147,8 +169,10 @@ namespace TextEditorApp.Utilities
                 }
 
                 fs.Flush();
-                fs.Close();
             }
+
+            //Free memory
+            chunks = null;
         }
 
         public static byte[] GetBytes(string str)
@@ -156,6 +180,18 @@ namespace TextEditorApp.Utilities
             byte[] bytes = new byte[str.Length * sizeof(char)];
             System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
             return bytes;
+        }
+
+        static string[] tobeRemoved = { "\0" };
+
+        public static char[] RemoveSpecialChars(char[] chars)
+        {
+            string tmp = new string(chars);
+            foreach (string item in tobeRemoved)
+            {
+                tmp = tmp.Replace(item, String.Empty);
+            }
+            return tmp.ToCharArray();
         }
     }
 }
