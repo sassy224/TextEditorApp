@@ -35,7 +35,6 @@ namespace TextEditorApp.Utilities
                 long currentSize = 0;
                 long currentTotalSize = 0;
                 long incrementSize = (totalSize / 100);
-                FileOperationArgument foa;
 
                 // Open the text file with open filemode access.
                 using (FileStream fs = new FileStream(filePath, FileMode.Open))
@@ -45,7 +44,6 @@ namespace TextEditorApp.Utilities
                         // This buffer is only 10*1024 characters long so we process the file in 10*1024 char chunks.
                         // We could have boosted this up, but we want a slow process to show the slow progress.
                         char[] buff = new char[10 * 1024];
-                        int len = buff.Length;
 
                         // Read through the file until end of file
                         while (!stream.EndOfStream)
@@ -53,8 +51,7 @@ namespace TextEditorApp.Utilities
                             // Add to the current position in the file
                             currentSize += stream.Read(buff, 0, buff.Length);
 
-                            //Remove "\0"
-                            sb.Append(RemoveSpecialChars(buff));
+                            sb.Append(buff);
                             Array.Clear(buff, 0, buff.Length);
 
                             // Once we hit a milestone, subtract the milestone value and
@@ -68,24 +65,24 @@ namespace TextEditorApp.Utilities
                                 if (percentComplete > 100)
                                     percentComplete = 100;
 
-                                foa = new FileOperationArgument(String.Empty, false, sb.ToString());
-                                worker.ReportProgress(percentComplete, foa);
+                                worker.ReportProgress(percentComplete, sb.ToString());
 
                                 //Reset string builder
                                 sb = new StringBuilder();
-                                //Sleep 100ms to let UI update
+                                //Sleep 200ms to let UI update
                                 Thread.Sleep(200);
                             }
                         }
                     }
                 }
 
-                foa = new FileOperationArgument(String.Empty, false, sb.ToString());
-                worker.ReportProgress(100, foa);
+                //Set progress to 100
+                worker.ReportProgress(100, sb.ToString());
                 Thread.Sleep(200);
 
                 //Free memory
                 sb = null;
+                fileSize = null;
                 GC.Collect();
             }
             catch (Exception)

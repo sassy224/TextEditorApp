@@ -159,6 +159,9 @@ namespace TextEditorApp.Mediator
             ((UserControl)editorControl).Cursor = Cursors.Default;
             // Enable controls
             editorControl.EnableControls();
+
+            //Free memory
+            GC.Collect(2);
         }
 
         /// <summary>
@@ -237,6 +240,10 @@ namespace TextEditorApp.Mediator
             isWrite = true;
             FileOperationArgument foa = new FileOperationArgument(fileName, isWrite, editorControl.BodyContentText);
             bgWorker.RunWorkerAsync(foa);
+
+            //Free memory
+            foa.Dispose();
+            GC.Collect();
         }
 
         private bool _disposed = false;

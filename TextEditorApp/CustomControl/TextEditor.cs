@@ -260,14 +260,15 @@ namespace TextEditorApp.CustomControl
         public void UpdateProgress(int percentage, object additionalData = null)
         {
             this.SuspendLayout();
+
             prgBar.Value = percentage;
             lblResult.Text = percentage + "%";
 
             //Append text to editor
             if (additionalData != null)
             {
-                FileOperationArgument foa = (FileOperationArgument)additionalData;
-                txtContent.AppendText(foa.FileContent);
+                txtContent.AppendText(additionalData.ToString());
+                additionalData = null;
             }
             this.ResumeLayout(false);
         }
@@ -366,10 +367,8 @@ namespace TextEditorApp.CustomControl
             }
             set
             {
-                if (String.IsNullOrEmpty(value))
-                    txtContent.Clear();
-                else
-                    txtContent.Text = value;
+                txtContent.Clear();
+                txtContent.Text = value;
             }
         }
 
