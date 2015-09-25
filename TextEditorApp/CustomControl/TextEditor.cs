@@ -366,7 +366,10 @@ namespace TextEditorApp.CustomControl
             }
             set
             {
-                txtContent.Text = value;
+                if (String.IsNullOrEmpty(value))
+                    txtContent.Clear();
+                else
+                    txtContent.Text = value;
             }
         }
 

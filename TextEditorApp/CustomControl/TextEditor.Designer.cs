@@ -68,14 +68,12 @@
             // 
             this.prgBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.prgBar.Cursor = System.Windows.Forms.Cursors.WaitCursor;
             this.prgBar.Location = new System.Drawing.Point(13, 474);
             this.prgBar.Name = "prgBar";
             this.prgBar.Size = new System.Drawing.Size(585, 23);
             this.prgBar.Step = 1;
             this.prgBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.prgBar.TabIndex = 3;
-            this.prgBar.UseWaitCursor = true;
             // 
             // btnSave
             // 

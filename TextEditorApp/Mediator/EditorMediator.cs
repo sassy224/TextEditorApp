@@ -155,6 +155,8 @@ namespace TextEditorApp.Mediator
                 }
             }
 
+            //Reset cursor
+            ((UserControl)editorControl).Cursor = Cursors.Default;
             // Enable controls
             editorControl.EnableControls();
         }
@@ -204,6 +206,10 @@ namespace TextEditorApp.Mediator
         /// <param name="fileName"></param>
         private void StartReadFile(string fileName)
         {
+            //Update cursor
+            ((UserControl)editorControl).Cursor = Cursors.WaitCursor;
+            //Clear text
+            editorControl.BodyContentText = String.Empty;
             //Disable controls
             editorControl.DisableControls();
             //Reset progress
@@ -221,6 +227,8 @@ namespace TextEditorApp.Mediator
         /// <param name="fileName"></param>
         private void StartSaveFile(string fileName)
         {
+            //Update cursor
+            ((UserControl)editorControl).Cursor = Cursors.WaitCursor;
             //Disable controls
             editorControl.DisableControls();
             //Reset progress

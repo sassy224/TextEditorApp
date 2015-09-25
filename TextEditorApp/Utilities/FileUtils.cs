@@ -115,6 +115,7 @@ namespace TextEditorApp.Utilities
                 }
 
                 //Free memory
+                Array.Clear(bytesArray, 0, bytesArray.Length);
                 bytesArray = null;
 
                 return true;
