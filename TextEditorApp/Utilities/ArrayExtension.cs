@@ -26,5 +26,19 @@ namespace TextEditorApp.Utilities
                 yield return array.Skip(i * size).Take(size);
             }
         }
+
+        /// <summary>
+        /// Splits a string into smaller substrings
+        /// </summary>
+        /// <param name="str">The string to be splitted</param>
+        /// <param name="maxLength">The maximum size of the substring</param>
+        /// <returns>Array of sub strings</returns>
+        public static IEnumerable<string> SplitByLength(this string str, int maxLength)
+        {
+            for (int index = 0; index < str.Length; index += maxLength)
+            {
+                yield return str.Substring(index, Math.Min(maxLength, str.Length - index));
+            }
+        }
     }
 }

@@ -12,6 +12,8 @@ namespace TextEditorApp.Utilities
 {
     public static class FileUtils
     {
+        private const int BUFFER_SIZE = 10 * 1024; //10Kb
+
         /// <summary>
         /// Read text content from a file asynchronously and report pieces of text back for appending
         /// </summary>
@@ -40,9 +42,9 @@ namespace TextEditorApp.Utilities
                 {
                     using (StreamReader stream = new StreamReader(fs))
                     {
-                        // This buffer is only 100 characters long so we process the file in 100 char chunks.
+                        // This buffer is only 10*1024 characters long so we process the file in 10*1024 char chunks.
                         // We could have boosted this up, but we want a slow process to show the slow progress.
-                        char[] buff = new char[100];
+                        char[] buff = new char[10 * 1024];
                         int len = buff.Length;
 
                         // Read through the file until end of file
@@ -84,6 +86,7 @@ namespace TextEditorApp.Utilities
 
                 //Free memory
                 sb = null;
+                GC.Collect();
             }
             catch (Exception)
             {
@@ -98,89 +101,55 @@ namespace TextEditorApp.Utilities
         /// <param name="filePath">Full path to file</param>
         /// <param name="worker">BackgroundWorker object</param>
         /// <returns>True if success, Exception otherwise</returns>
-        public static bool WriteTextToFileAsync(string textContent, string filePath, BackgroundWorker worker)
+        public static void WriteTextToFileAsync(string textContent, string filePath, BackgroundWorker worker)
         {
             try
             {
-                //Convert string to bytes
-                byte[] bytesArray = GetBytes(textContent);
+                //Split into smaller arrays of length 10k
+                var chunks = textContent.SplitByLength(10 * 1024);
+                long totalSize = textContent.Length;
+                long incrementSize = (totalSize / 100);
+                long currentChunksCount = 0;
+                long currentTotalChunksCount = 0;
 
-                if (bytesArray.Length < 1024 * 1024 * 10) //10Mb
+                using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
                 {
-                    WriteSmallFile(bytesArray, filePath);
+                    using (StreamWriter sw = new StreamWriter(fs))
+                    {
+                        foreach (var chunk in chunks)
+                        {
+                            sw.Write(chunk);
+                            currentChunksCount += chunk.Count();
+
+                            if (worker != null && currentChunksCount >= incrementSize)
+                            {
+                                currentTotalChunksCount += currentChunksCount;
+                                currentChunksCount -= incrementSize;
+
+                                int percentage = (int)((float)currentTotalChunksCount / (float)totalSize * 100);
+                                if (percentage > 100)
+                                    percentage = 100;
+
+                                worker.ReportProgress(percentage);
+                                //Sleep 100ms to let UI update
+                                Thread.Sleep(200);
+                            }
+                        }
+                        sw.Flush();
+                    }
+                    //fs.Flush();
                 }
-                else
-                {
-                    WriteBigFileAsync(bytesArray, filePath, worker);
-                }
+                worker.ReportProgress(100);
+                Thread.Sleep(200);
 
                 //Free memory
-                Array.Clear(bytesArray, 0, bytesArray.Length);
-                bytesArray = null;
-
-                return true;
+                chunks = null;
+                GC.Collect();
             }
             catch (Exception)
             {
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Write small file, use FileStream to write all bytes to file right away.
-        /// Since this will be finished in an instance, no need to use BackgroundWorker to report progress
-        /// </summary>
-        /// <param name="bytesArray">Array of bytes to be written to file</param>
-        /// <param name="filePath">Full path to file</param>
-        private static void WriteSmallFile(byte[] bytesArray, string filePath)
-        {
-            using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-            {
-                fs.Write(bytesArray, 0, bytesArray.Length);
-                fs.Flush();
-            }
-        }
-
-        /// <summary>
-        /// Write big file, split the byte array into smaller arrays (chunks), then write them in sequence to the file.
-        /// Since this might take some times, use a BackgroundWorker to report progress
-        /// </summary>
-        /// <param name="bytesArray">Array of bytes to be written to file</param>
-        /// <param name="filePath">Full path to file</param>
-        /// <param name="worker">BackgroundWorker object</param>
-        private static void WriteBigFileAsync(byte[] bytesArray, string filePath, BackgroundWorker worker)
-        {
-            //Split into 100 smaller arrays
-            var chunks = bytesArray.Split(bytesArray.Length / 100);
-            int percentage = 0;
-
-            using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-            {
-                foreach (var chunk in chunks)
-                {
-                    fs.Write(chunk.ToArray(), 0, chunk.Count());
-
-                    if (worker != null)
-                    {
-                        percentage += 1;
-                        if (percentage > 100)
-                            percentage = 100;
-                        worker.ReportProgress(percentage);
-                    }
-                }
-
-                fs.Flush();
-            }
-
-            //Free memory
-            chunks = null;
-        }
-
-        public static byte[] GetBytes(string str)
-        {
-            byte[] bytes = new byte[str.Length * sizeof(char)];
-            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-            return bytes;
         }
 
         static string[] tobeRemoved = { "\0" };

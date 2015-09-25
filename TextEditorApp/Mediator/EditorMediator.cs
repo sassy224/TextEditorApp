@@ -171,7 +171,7 @@ namespace TextEditorApp.Mediator
             FileOperationArgument foa = (FileOperationArgument)e.Argument;
             if (foa.IsWrite)
             {
-                e.Result = FileUtils.WriteTextToFileAsync(foa.FileContent, foa.FilePath, bgWorker);
+                FileUtils.WriteTextToFileAsync(foa.FileContent, foa.FilePath, bgWorker);
             }
             else
             {

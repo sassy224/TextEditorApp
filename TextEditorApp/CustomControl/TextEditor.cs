@@ -172,7 +172,7 @@ namespace TextEditorApp.CustomControl
             string fileName = (string)e.Argument;
             if (isWrite)
             {
-                e.Result = FileUtils.WriteTextToFileAsync(textContent, fileName, bgWorker);
+                FileUtils.WriteTextToFileAsync(textContent, fileName, bgWorker);
             }
             else
             {
